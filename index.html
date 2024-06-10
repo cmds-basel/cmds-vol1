@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MindAR and p5.js integration example">
+  <title>MindAR + p5.js Example</title>
+
+  <!-- Disable caching during development -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <!-- Load A-Frame, MindAR, p5.js, YouTube API and sketch.js -->
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
+  <script src="js/p5.min.js"></script>
+  <script src="js/sketch.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+
+  <style>
+    body {
+      background: #000;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      user-select: none; /* Prevent text selection */
+    }
+    #vidPlayer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      display: none;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Canvas container for p5.js -->
+  <div id="canvasContainer">
+    <canvas id="canvas"></canvas>
+  </div>
+  
+  <!-- Video player container -->
+  <div id="vidPlayer">
+    <iframe id="videoFrame" src="https://www.youtube.com/embed/?enablejsapi=1&rel=0&autoplay=1&loop=1&controls=0" frameborder="0" allow="autoplay; encrypted-media;" allowfullscreen></iframe>
+  </div>
+  
+  <!-- A-Frame scene with MindAR -->
+  <a-scene mindar-image="imageTargetSrc: data/targets.mind; filterMinCF:0.0005; filterBeta: .1;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <!-- Target entities (repeat as needed) -->
+    <a-entity mindar-image-target="targetIndex: 0" target-visible="targetIndex: 0">
+      <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
+    </a-entity>
+    <!-- Add more targets here -->
+  </a-scene>
+
+  <script>
+    const targetVideoMap = {
+      0: "S0P7iYdgvcE",
+      1: "kFjnF1E8uGY",
+      2: "U0FHTbmM_jI",
+      3: "6b8_vOafEsc",
+      4: "Bv1jgyuu7Dk",
+      5: "TFj-tgLIxJ8",
+      6: "d1sN2V-5AD0",
+      7: "f8UKLtQYhUk",
+      8: "29lazCsvsPw",
+      9: "-Q9jlS7l-h0",
+    };
+
+    let player;
+    let playerReady = false;
+    let pendingVideoId = null;
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('videoFrame', {
+        events: {
+          'onReady': onPlayerReady
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      console.log('YouTube Player is ready.');
+      playerReady = true;
+      if (pendingVideoId) {
+        player.loadVideoById(pendingVideoId);
+        player.playVideo();
+        pendingVideoId = null;
+      }
+    }
+
+    function playVideo(targetIndex) {
+      const videoId = targetVideoMap[targetIndex];
+      if (playerReady) {
+        player.loadVideoById(videoId);
+        player.playVideo();
+      } else {
+        console.error('Player is not ready yet. Will play when ready.');
+        pendingVideoId = videoId;
+      }
+    }
+
+    function pauseVideo() {
+      if (playerReady) {
+        player.pauseVideo();
+      }
+    }
+
+    AFRAME.registerComponent('canvas-updater', {
+      dependencies: ['geometry', 'material'],
+
+      tick: function () {
+        var material, el = this.el;
+        material = el.getObject3D('mesh').material;
+        if (!material.map) { return; }
+          material.map.needsUpdate = true;
+      }
+    });
+
+    AFRAME.registerComponent('target-visible', {
+      schema: {
+        targetIndex: {type: 'int'}
+      },
+      init: function() {
+        this.el.addEventListener('targetFound', () => {
+          const targetIndex = this.data.targetIndex;
+          console.log(`Target Found: ${targetIndex}`);
+          playVideo(targetIndex);
+          let vidPlayer = document.getElementById('vidPlayer');
+          vidPlayer.style.display = 'block';
+        });
+
+        this.el.addEventListener('targetLost', () => {
+          console.log('Target Lost');
+          pauseVideo();
+          let vidPlayer = document.getElementById('vidPlayer');
+          vidPlayer.style.display = 'none';
+        });
+      }
+    });
+  </script>
+</body>
+</html>
