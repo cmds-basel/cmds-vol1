@@ -15,22 +15,61 @@
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
   <script src="js/p5.min.js"></script>
   <script src="js/sketch.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
 
   <!-- A-Frame keep loading latest output of canvas -->
   <script type="text/javascript">
     const targetVideoMap = {
-       0: "https://www.youtube.com/embed/shorts/S0P7iYdgvcE?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
-       1: "https://www.youtube.com/embed/kFjnF1E8uGY?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
-       2: "https://www.youtube.com/embed/shorts/U0FHTbmM_jI?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
-       3: "https://www.youtube.com/embed/6b8_vOafEsc?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
-       4: "https://www.youtube.com/embed/shorts/Bv1jgyuu7Dk?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
-       5: "https://www.youtube.com/embed/TFj-tgLIxJ8?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
-       6: "https://www.youtube.com/embed/shorts/d1sN2V-5AD0?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
-       7: "https://www.youtube.com/embed/shorts/f8UKLtQYhUk?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
-       8: "https://www.youtube.com/embed/29lazCsvsPw?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
-       9: "https://www.youtube.com/embed/-Q9jlS7l-h0?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
-  // 10: "https://www.youtube.com/embed/VIDEO_ID_11?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0"
-};
+      0: "S0P7iYdgvcE",
+      1: "kFjnF1E8uGY",
+      2: "U0FHTbmM_jI",
+      3: "6b8_vOafEsc",
+      4: "Bv1jgyuu7Dk",
+      5: "TFj-tgLIxJ8",
+      6: "d1sN2V-5AD0",
+      7: "f8UKLtQYhUk",
+      8: "29lazCsvsPw",
+      9: "-Q9jlS7l-h0",
+    };
+
+    let player;
+    let playerReady = false;
+    let pendingVideoId = null;
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('videoFrame', {
+        events: {
+          'onReady': onPlayerReady
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      console.log('YouTube Player is ready.');
+      playerReady = true;
+      if (pendingVideoId) {
+        player.loadVideoById(pendingVideoId);
+        player.playVideo();
+        pendingVideoId = null;
+      }
+    }
+
+    function playVideo(targetIndex) {
+      const videoId = targetVideoMap[targetIndex];
+      if (playerReady) {
+        player.loadVideoById(videoId);
+        player.playVideo();
+      } else {
+        console.error('Player is not ready yet. Will play when ready.');
+        pendingVideoId = videoId;
+      }
+    }
+
+    function pauseVideo() {
+      if (playerReady) {
+        player.pauseVideo();
+      }
+    }
 
     AFRAME.registerComponent('canvas-updater', {
       dependencies: ['geometry', 'material'],
@@ -50,23 +89,17 @@
       init: function() {
         this.el.addEventListener('targetFound', () => {
           const targetIndex = this.data.targetIndex;
-          const videoUrl = targetVideoMap[targetIndex];
-          if (videoUrl) {
-            console.log(`Target Found: ${targetIndex}`);
-            let vidPlayer = document.getElementById('vidPlayer');
-            vidPlayer.style.display = 'block';
-            let iframe = document.getElementById('videoFrame');
-            iframe.src = videoUrl;
-            iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-          }
+          console.log(`Target Found: ${targetIndex}`);
+          playVideo(targetIndex);
+          let vidPlayer = document.getElementById('vidPlayer');
+          vidPlayer.style.display = 'block';
         });
 
         this.el.addEventListener('targetLost', () => {
           console.log('Target Lost');
+          pauseVideo();
           let vidPlayer = document.getElementById('vidPlayer');
           vidPlayer.style.display = 'none';
-          let iframe = document.getElementById('videoFrame');
-          iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
         });
       }
     });
@@ -105,7 +138,7 @@
     <canvas id="canvas"></canvas>
   </div>
   <div id="vidPlayer">
-    <iframe id="videoFrame" width="100%" height="100%" frameborder="0" allow="autoplay; encrypted-media;" allowfullscreen></iframe>
+    <iframe id="videoFrame" width="100%" height="100%" src="https://www.youtube.com/embed/?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0" frameborder="0" allow="autoplay; encrypted-media;" allowfullscreen></iframe>
   </div>
   
   <!-- MindAR + A-Frame tracking -->
