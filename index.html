@@ -1,56 +1,150 @@
+<!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-  <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v6.1.0/dist/aframe-extras.min.js"></script>
+  <title>mindar-p5js-example-sw</title>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const sceneEl = document.querySelector('a-scene');
-      let arSystem;
-      sceneEl.addEventListener('loaded', function () {
-        arSystem = sceneEl.systems["mindar-image-system"];
-      });
-      const exampleTarget = document.querySelector('#example-target');
+  <!-- disable following 3 lines for production -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
 
-      // arReady event triggered when ready
-      sceneEl.addEventListener("arReady", (event) => {
-        console.log("MindAR is ready")
-      });
-      // arError event triggered when something went wrong. Mostly browser compatbility issue
-      sceneEl.addEventListener("arError", (event) => {
-        console.log("MindAR failed to start")
-      });
+  <!-- load MindAR + A-Frame + custom p5.js + your sketch -->
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
+  <script src="js/p5.min.js"></script>
+  <script src="js/sketch.js"></script>
 
-      // WHICH TARGET HIT
-      const targets = document.querySelectorAll("a-entity[mindar-image-target]");
-      targets.forEach((target) => {
-        target.addEventListener("targetFound", event => {
-          console.log(target.getAttribute('mindar-image-target'))
+  <!-- A-Frame keep loading latest output of canvas -->
+  <script type="text/javascript">
+    const targetVideoMap = {
+       0: "https://www.youtube.com/embed/shorts/S0P7iYdgvcE?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
+       1: "https://www.youtube.com/embed/kFjnF1E8uGY?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
+       2: "https://www.youtube.com/embed/shorts/U0FHTbmM_jI?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
+       3: "https://www.youtube.com/embed/6b8_vOafEsc?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
+       4: "https://www.youtube.com/embed/shorts/Bv1jgyuu7Dk?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
+       5: "https://www.youtube.com/embed/TFj-tgLIxJ8?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
+       6: "https://www.youtube.com/embed/shorts/d1sN2V-5AD0?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
+       7: "https://www.youtube.com/embed/shorts/f8UKLtQYhUk?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
+       8: "https://www.youtube.com/embed/29lazCsvsPw?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
+       9: "https://www.youtube.com/embed/-Q9jlS7l-h0?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0",
+  // 10: "https://www.youtube.com/embed/VIDEO_ID_11?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0"
+};
+
+    AFRAME.registerComponent('canvas-updater', {
+      dependencies: ['geometry', 'material'],
+
+      tick: function () {
+        var material, el = this.el;
+        material = el.getObject3D('mesh').material;
+        if (!material.map) { return; }
+          material.map.needsUpdate = true;
+      }
+    });
+
+    AFRAME.registerComponent('target-visible', {
+      schema: {
+        targetIndex: {type: 'int'}
+      },
+      init: function() {
+        this.el.addEventListener('targetFound', () => {
+          const targetIndex = this.data.targetIndex;
+          const videoUrl = targetVideoMap[targetIndex];
+          if (videoUrl) {
+            console.log(`Target Found: ${targetIndex}`);
+            let vidPlayer = document.getElementById('vidPlayer');
+            vidPlayer.style.display = 'block';
+            let iframe = document.getElementById('videoFrame');
+            iframe.src = videoUrl;
+            iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+          }
         });
-        target.addEventListener("targetLost", event => {
-          console.log(target.getAttribute('mindar-image-target'))
+
+        this.el.addEventListener('targetLost', () => {
+          console.log('Target Lost');
+          let vidPlayer = document.getElementById('vidPlayer');
+          vidPlayer.style.display = 'none';
+          let iframe = document.getElementById('videoFrame');
+          iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
         });
-      });
+      }
     });
   </script>
-
+  <style type="text/css">
+    /* prevent user select on long touch */
+    body {
+      background: #000;
+      -webkit-user-select: none; /* Safari */
+      -ms-user-select: none; /* IE 10 and IE 11 */
+      user-select: none; /* Standard syntax */
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Prevent scrolling */
+    }
+    #vidPlayer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%; /* Ensure the video player covers the entire viewport */
+      height: 100%; /* Ensure the video player covers the entire viewport */
+      pointer-events: none;
+      z-index: 1; /* Ensure it's above the AR content */
+      display: none; /* Initially hidden */
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
 </head>
 <body>
-  <a-scene mindar-image="imageTargetSrc: targets.mind" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-    <a-assets>
-      <!-- preload assets here... -->
-    </a-assets>
 
+  <!-- our canvas to load p5.js into -->
+  <div id="canvasContainer">
+    <canvas id="canvas"></canvas>
+  </div>
+  <div id="vidPlayer">
+    <iframe id="videoFrame" width="100%" height="100%" frameborder="0" allow="autoplay; encrypted-media;" allowfullscreen></iframe>
+  </div>
+  
+  <!-- MindAR + A-Frame tracking -->
+  <a-scene mindar-image="imageTargetSrc: data/targets.mind; filterMinCF:0.0005; filterBeta: .1;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-    <a-entity mindar-image-target="targetIndex: 7">
-      <a-vimeo src="https://vimeo.com/802164523" width="1" height="0.552" position="0 0 0" rotation="0 0 0"></a-vimeo>
+    <!-- Repeat the following a-entity block for each target -->
+    <a-entity mindar-image-target="targetIndex: 0" target-visible="targetIndex: 0">
+      <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
     </a-entity>
-
-    <!-- Add other mindar-image-target entities here if needed -->
-
+    <a-entity mindar-image-target="targetIndex: 1" target-visible="targetIndex: 1">
+      <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
+    </a-entity>
+    <a-entity mindar-image-target="targetIndex: 2" target-visible="targetIndex: 2">
+      <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
+    </a-entity>
+    <a-entity mindar-image-target="targetIndex: 3" target-visible="targetIndex: 3">
+      <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
+    </a-entity>
+    <a-entity mindar-image-target="targetIndex: 4" target-visible="targetIndex: 4">
+      <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
+    </a-entity>
+    <a-entity mindar-image-target="targetIndex: 5" target-visible="targetIndex: 5">
+      <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
+    </a-entity>
+    <a-entity mindar-image-target="targetIndex: 6" target-visible="targetIndex: 6">
+      <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
+    </a-entity>
+    <a-entity mindar-image-target="targetIndex: 7" target-visible="targetIndex: 7">
+      <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
+    </a-entity>
+    <a-entity mindar-image-target="targetIndex: 8" target-visible="targetIndex: 8">
+      <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
+    </a-entity>
+    <a-entity mindar-image-target="targetIndex: 9" target-visible="targetIndex: 9">
+      <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
+    </a-entity>
+<!--     <a-entity mindar-image-target="targetIndex: 10" target-visible="targetIndex: 10">
+      <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
+    </a-entity> -->
   </a-scene>
 </body>
 </html>
