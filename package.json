@@ -1,5 +1,5 @@
 {
-  "name": "my-ar-project",
+  "name": "cmds-vol1",
   "version": "1.0.0",
   "scripts": {
     "build": "cp -R * public/"
