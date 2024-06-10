@@ -1,0 +1,8 @@
+{
+  "name": "my-ar-project",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cp -R * public/"
+  },
+  "dependencies": {}
+}
