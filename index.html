@@ -22,13 +22,13 @@
     console.log('ready!')
 
     const targetVideoMap = {
-      0: "kFjnF1E8uGY", 
-      1: "Bv1jgyuu7Dk", 
-      2: "TFj-tgLIxJ8", //U0FHTbmM_jI
-      3: "d1sN2V-5AD0", //6b8_vOafEsc
-      4: "f8UKLtQYhUk", //f8UKLtQYhUk //
+      0: ["kFjnF1E8uGY", "U0FHTbmM_jI"], 
+      1: ["Bv1jgyuu7Dk", "1RkBEPVzVxY"], 
+      2: "TFj-tgLIxJ8", 
+      3: "d1sN2V-5AD0", 
+      4: "f8UKLtQYhUk", 
       5: "29lazCsvsPw", 
-      6: "-Q9jlS7l-h0",  //d1sN2V-5AD0
+      6: "-Q9jlS7l-h0", 
       7: "bESn3UQdci0",
       8: "S0P7iYdgvcE", 
       // 9: "-Q9jlS7l-h0",
@@ -37,6 +37,7 @@
     let player;
     let playerReady = false;
     let pendingVideoId = null;
+    let currentVideoIndex = {};
 
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('videoFrame', {
@@ -57,13 +58,20 @@
     }
 
     function playVideo(targetIndex) {
-      const videoId = targetVideoMap[targetIndex];
-      if (playerReady) {
-        player.loadVideoById(videoId);
-        player.playVideo();
-      } else {
-        console.error('Player is not ready yet. Will play when ready.');
-        pendingVideoId = videoId;
+      const videoIds = targetVideoMap[targetIndex];
+      if (videoIds) {
+        if (!currentVideoIndex[targetIndex]) {
+          currentVideoIndex[targetIndex] = 0;
+        }
+        const videoId = videoIds[currentVideoIndex[targetIndex] % videoIds.length];
+        currentVideoIndex[targetIndex]++;
+        if (playerReady) {
+          player.loadVideoById(videoId);
+          player.playVideo();
+        } else {
+          console.error('Player is not ready yet. Will play when ready.');
+          pendingVideoId = videoId;
+        }
       }
     }
 
@@ -174,12 +182,6 @@
     <a-entity mindar-image-target="targetIndex: 8" target-visible="targetIndex: 8">
       <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
     </a-entity>
-<!--     <a-entity mindar-image-target="targetIndex: 9" target-visible="targetIndex: 9">
-      <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
-    </a-entity> -->
-<!--     <a-entity mindar-image-target="targetIndex: 10" target-visible="targetIndex: 10">
-      <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
-    </a-entity> -->
   </a-scene>
 </body>
 </html>
