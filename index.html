@@ -22,16 +22,16 @@
     console.log('ready!')
 
     const targetVideoMap = {
-      0: "S0P7iYdgvcE",
-      1: "kFjnF1E8uGY",
-      2: "U0FHTbmM_jI",
-      3: "6b8_vOafEsc",
-      4: "Bv1jgyuu7Dk",
-      5: "TFj-tgLIxJ8",
-      6: "d1sN2V-5AD0",
-      7: "f8UKLtQYhUk",
-      8: "29lazCsvsPw",
-      9: "-Q9jlS7l-h0",
+      0: "kFjnF1E8uGY", 
+      1: "Bv1jgyuu7Dk", 
+      2: "TFj-tgLIxJ8", //U0FHTbmM_jI
+      3: "d1sN2V-5AD0", //6b8_vOafEsc
+      4: "f8UKLtQYhUk", //f8UKLtQYhUk //
+      5: "29lazCsvsPw", 
+      6: "-Q9jlS7l-h0",  //d1sN2V-5AD0
+      // 7: "f8UKLtQYhUk",
+      // 8: "S0P7iYdgvcE", 
+      // 9: "-Q9jlS7l-h0",
     };
 
     let player;
@@ -144,7 +144,7 @@
   </div>
   
   <!-- MindAR + A-Frame tracking -->
-  <a-scene mindar-image="imageTargetSrc:data/targets.mind; filterMinCF:0.0005; filterBeta: .1;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+  <a-scene mindar-image="imageTargetSrc:data/targets.mind?2; filterMinCF:0.0005; filterBeta: .1;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
     <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
     <!-- Repeat the following a-entity block for each target -->
     <a-entity mindar-image-target="targetIndex: 0" target-visible="targetIndex: 0">
@@ -168,7 +168,7 @@
     <a-entity mindar-image-target="targetIndex: 6" target-visible="targetIndex: 6">
       <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
     </a-entity>
-    <a-entity mindar-image-target="targetIndex: 7" target-visible="targetIndex: 7">
+<!--     <a-entity mindar-image-target="targetIndex: 7" target-visible="targetIndex: 7">
       <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
     </a-entity>
     <a-entity mindar-image-target="targetIndex: 8" target-visible="targetIndex: 8">
@@ -176,7 +176,7 @@
     </a-entity>
     <a-entity mindar-image-target="targetIndex: 9" target-visible="targetIndex: 9">
       <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
-    </a-entity>
+    </a-entity> -->
 <!--     <a-entity mindar-image-target="targetIndex: 10" target-visible="targetIndex: 10">
       <a-plane position="0 0 0" scale="1.05 1.05 1.05" height="1.4145" width="1" rotation="0 0 0" material="src:#canvas" canvas-updater></a-plane>
     </a-entity> -->
