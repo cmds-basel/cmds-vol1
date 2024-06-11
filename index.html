@@ -51,7 +51,6 @@
       playerReady = true;
       if (pendingVideoId) {
         player.loadVideoById(pendingVideoId);
-        player.unMute();  // 소리 켜기
         player.playVideo();
         pendingVideoId = null;
       }
@@ -59,7 +58,7 @@
 
     function playVideo(targetIndex) {
       const videoIds = targetVideoMap[targetIndex];
-      if (videoIds && videoIds.length > 0) {
+      if (videoIds) {
         if (!currentVideoIndex[targetIndex]) {
           currentVideoIndex[targetIndex] = 0;
         }
@@ -67,7 +66,6 @@
         currentVideoIndex[targetIndex]++;
         if (playerReady) {
           player.loadVideoById(videoId);
-          player.unMute();  // 소리 켜기
           player.playVideo();
         } else {
           console.error('Player is not ready yet. Will play when ready.');
@@ -114,16 +112,6 @@
         });
       }
     });
-
-    function enableAutoplay() {
-      document.getElementById('autoplayButton').style.display = 'none';
-      if (playerReady && pendingVideoId) {
-        player.loadVideoById(pendingVideoId);
-        player.unMute();
-        player.playVideo();
-        pendingVideoId = null;
-      }
-    }
   </script>
   <style type="text/css">
     /* prevent user select on long touch */
@@ -150,17 +138,6 @@
       width: 100%;
       height: 100%;
     }
-    #autoplayButton {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 10px 20px;
-      background-color: #fff;
-      border: none;
-      cursor: pointer;
-      z-index: 2;
-    }
   </style>
 </head>
 <body>
@@ -170,11 +147,8 @@
     <canvas id="canvas"></canvas>
   </div>
   <div id="vidPlayer">
-    <iframe id="videoFrame" width="100%" height="100%" src="https://www.youtube.com/embed/?enablejsapi=1&rel=0&autoplay=1&loop=1&controls=0" frameborder="0" allow="autoplay; encrypted-media;" allowfullscreen></iframe>
+    <iframe id="videoFrame" width="100%" height="100%" src="https://www.youtube.com/embed/?enablejsapi=1&rel=0&mute=1&autoplay=1&loop=1&controls=0" frameborder="0" allow="autoplay; encrypted-media;" allowfullscreen></iframe>
   </div>
-  
-  <!-- Autoplay button -->
-  <button id="autoplayButton" onclick="enableAutoplay()">Click to enable autoplay</button>
   
   <!-- MindAR + A-Frame tracking -->
   <a-scene mindar-image="imageTargetSrc: data/targets.mind?2; filterMinCF: 0.0001; filterBeta: 0.05;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
