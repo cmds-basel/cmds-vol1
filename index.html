@@ -24,13 +24,14 @@
     const targetVideoMap = {
       0: ["kFjnF1E8uGY", "U0FHTbmM_jI"], 
       1: ["Bv1jgyuu7Dk", "1RkBEPVzVxY"], 
-      2: ["TFj-tgLIxJ8"], 
-      3: ["d1sN2V-5AD0"], 
-      4: ["f8UKLtQYhUk"], 
-      5: ["29lazCsvsPw"], 
-      6: ["-Q9jlS7l-h0"], 
-      7: ["bESn3UQdci0"],
-      8: ["S0P7iYdgvcE"]
+      2: "TFj-tgLIxJ8", 
+      3: "d1sN2V-5AD0", 
+      4: "f8UKLtQYhUk", 
+      5: "29lazCsvsPw", 
+      6: "-Q9jlS7l-h0", 
+      7: "bESn3UQdci0",
+      8: "S0P7iYdgvcE", 
+      // 9: "-Q9jlS7l-h0",
     };
 
     let player;
@@ -51,7 +52,6 @@
       playerReady = true;
       if (pendingVideoId) {
         player.loadVideoById(pendingVideoId);
-        player.unMute();  // 소리 켜기
         player.playVideo();
         pendingVideoId = null;
       }
@@ -59,7 +59,7 @@
 
     function playVideo(targetIndex) {
       const videoIds = targetVideoMap[targetIndex];
-      if (videoIds && videoIds.length > 0) {
+      if (videoIds) {
         if (!currentVideoIndex[targetIndex]) {
           currentVideoIndex[targetIndex] = 0;
         }
@@ -67,8 +67,8 @@
         currentVideoIndex[targetIndex]++;
         if (playerReady) {
           player.loadVideoById(videoId);
-          player.unMute();  // 소리 켜기
           player.playVideo();
+          player.unMute(); 
         } else {
           console.error('Player is not ready yet. Will play when ready.');
           pendingVideoId = videoId;
@@ -101,6 +101,7 @@
         this.el.addEventListener('targetFound', () => {
           const targetIndex = this.data.targetIndex;
           console.log(`Target Found: ${targetIndex}`);
+          player.unMute(); 
           playVideo(targetIndex);
           let vidPlayer = document.getElementById('vidPlayer');
           vidPlayer.style.display = 'block';
@@ -149,7 +150,7 @@
     <canvas id="canvas"></canvas>
   </div>
   <div id="vidPlayer">
-    <iframe id="videoFrame" width="100%" height="100%" src="https://www.youtube.com/embed/?enablejsapi=1&rel=0&autoplay=1&loop=1&controls=0" frameborder="0" allow="autoplay; encrypted-media;" allowfullscreen></iframe>
+    <iframe id="videoFrame" width="100%" height="100%" src="https://www.youtube.com/embed/?enablejsapi=1&rel=0&mute=0&autoplay=1&loop=1&controls=0" frameborder="0" allow="autoplay; encrypted-media;" allowfullscreen></iframe>
   </div>
   
   <!-- MindAR + A-Frame tracking -->
