@@ -68,7 +68,6 @@
         if (playerReady) {
           player.loadVideoById(videoId);
           player.playVideo();
-          player.unMute(); 
         } else {
           console.error('Player is not ready yet. Will play when ready.');
           pendingVideoId = videoId;
@@ -101,7 +100,6 @@
         this.el.addEventListener('targetFound', () => {
           const targetIndex = this.data.targetIndex;
           console.log(`Target Found: ${targetIndex}`);
-          player.unMute(); 
           playVideo(targetIndex);
           let vidPlayer = document.getElementById('vidPlayer');
           vidPlayer.style.display = 'block';
